@@ -1,0 +1,11 @@
+value,indicator_type,source,tags,notes
+evil-phishing-site.com,domain,phishtank,phishing,Reported phishing domain
+malware-download.net,domain,manual,"malware,trojan",Known malware distribution site
+192.0.2.45,ip,abuseipdb,"scanning,bruteforce",SSH brute force attempts
+198.51.100.123,ip,manual,botnet,Part of botnet infrastructure
+5d41402abc4b2a76b9719d911017c592,hash,malwarebazaar,trojan,MD5 hash of trojan executable
+44d88612fea8a8f36de82e1278abb02f,hash,manual,ransomware,SHA1 hash of ransomware sample
+http://malicious-url.com/payload.exe,url,openphish,"malware,phishing",Direct malware download link
+https://fake-bank-login.com,url,manual,phishing,Fake banking site
+attacker@evil-domain.com,email,manual,"phishing,spam",Known phishing email address
+compromised-site.org,domain,feed,"compromised,defaced",Website compromised and serving malware

@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Performance Metrics - Threat Analysis Agent</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <style>
+        .metric-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        .metric-value-large {
+            font-size: 3em;
+            font-weight: bold;
+            color: #667eea;
+            margin: 10px 0;
+        }
+        .confusion-matrix {
+            display: grid;
+            grid-template-columns: 100px 1fr 1fr;
+            gap: 2px;
+            background: #e2e8f0;
+            padding: 2px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        .matrix-cell {
+            background: white;
+            padding: 20px;
+            text-align: center;
+            font-weight: 600;
+        }
+        .matrix-header {
+            background: #667eea;
+            color: white;
+        }
+        .matrix-label {
+            background: #f7fafc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .matrix-tp { background: #d1fae5 !important; color: #065f46; }
+        .matrix-fp { background: #fee2e2 !important; color: #991b1b; }
+        .matrix-fn { background: #fef3c7 !important; color: #92400e; }
+        .matrix-tn { background: #dbeafe !important; color: #1e40af; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1>📊 Performance Metrics</h1>
+                <p class="subtitle">Classification Accuracy & Feedback Analysis</p>
+            </div>
+            <div class="header-actions">
+                <a href="/" class="btn btn-secondary" style="text-decoration: none; margin-right: 10px;">🏠 Dashboard</a>
+                <button class="btn btn-secondary" onclick="loadMetrics()">🔄 Refresh</button>
+            </div>
+        </header>
+
+        <!-- Metrics Cards -->
+        <div class="stats-grid" id="metricsGrid">
+            <div class="stat-card">
+                <div class="stat-content">
+                    <div class="stat-label">Total Feedback</div>
+                    <div class="stat-value" id="totalFeedback">0</div>
+                </div>
+            </div>
+            <div class="stat-card stat-card-success">
+                <div class="stat-content">
+                    <div class="stat-label">Accuracy</div>
+                    <div class="stat-value" id="accuracy">0%</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-content">
+                    <div class="stat-label">Precision</div>
+                    <div class="stat-value" id="precision">0%</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-content">
+                    <div class="stat-label">Recall</div>
+                    <div class="stat-value" id="recall">0%</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- F1 Score Card -->
+        <div class="metric-card">
+            <h2>F1 Score</h2>
+            <p style="color: #666; margin-bottom: 20px;">Harmonic mean of precision and recall</p>
+            <div class="metric-value-large" id="f1Score">0.0000</div>
+            <div id="f1Description" style="color: #666; margin-top: 10px;"></div>
+        </div>
+
+        <!-- Confusion Matrix -->
+        <div class="metric-card">
+            <h2>Confusion Matrix</h2>
+            <p style="color: #666; margin-bottom: 20px;">
+                Comparison of predicted vs actual classifications<br>
+                <small>Positive = High/Medium Risk | Negative = Low Risk</small>
+            </p>
+            <div class="confusion-matrix">
+                <!-- Headers -->
+                <div class="matrix-cell matrix-header"></div>
+                <div class="matrix-cell matrix-header">Predicted Positive</div>
+                <div class="matrix-cell matrix-header">Predicted Negative</div>
+                
+                <!-- Actual Positive Row -->
+                <div class="matrix-cell matrix-label">Actual<br>Positive</div>
+                <div class="matrix-cell matrix-tp">
+                    <div style="font-size: 2em;" id="truePositives">0</div>
+                    <div>True Positives</div>
+                    <small>Correctly identified threats</small>
+                </div>
+                <div class="matrix-cell matrix-fn">
+                    <div style="font-size: 2em;" id="falseNegatives">0</div>
+                    <div>False Negatives</div>
+                    <small>Missed threats</small>
+                </div>
+                
+                <!-- Actual Negative Row -->
+                <div class="matrix-cell matrix-label">Actual<br>Negative</div>
+                <div class="matrix-cell matrix-fp">
+                    <div style="font-size: 2em;" id="falsePositives">0</div>
+                    <div>False Positives</div>
+                    <small>False alarms</small>
+                </div>
+                <div class="matrix-cell matrix-tn">
+                    <div style="font-size: 2em;" id="trueNegatives">0</div>
+                    <div>True Negatives</div>
+                    <small>Correctly identified safe</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Metrics Explanation -->
+        <div class="metric-card">
+            <h2>📚 Metrics Explained</h2>
+            <div class="detail-grid">
+                <div class="detail-item">
+                    <div class="detail-label">Precision</div>
+                    <div class="detail-value">Of all predicted threats, how many were actual threats?</div>
+                    <small style="color: #666;">Formula: TP / (TP + FP)</small>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Recall</div>
+                    <div class="detail-value">Of all actual threats, how many did we catch?</div>
+                    <small style="color: #666;">Formula: TP / (TP + FN)</small>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">F1 Score</div>
+                    <div class="detail-value">Balanced measure of precision and recall</div>
+                    <small style="color: #666;">Formula: 2 × (P × R) / (P + R)</small>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Accuracy</div>
+                    <div class="detail-value">Overall correctness of predictions</div>
+                    <small style="color: #666;">Formula: (TP + TN) / Total</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Feedback Stats -->
+        <div class="metric-card">
+            <h2>📝 Feedback Statistics</h2>
+            <div id="feedbackStats"></div>
+            <div style="margin-top:12px; color:#555; font-size:0.95em;">
+                <strong>Note:</strong> Positive = High/Medium risk, Negative = Low risk. 
+                TP: model predicted threat and user agreed. FP: model predicted threat but user marked benign. 
+                FN: model predicted benign but user marked as threat. Use the correction field to explicitly record corrected risk.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = '';
+
+        // Load metrics on page load
+        document.addEventListener('DOMContentLoaded', loadMetrics);
+
+        async function loadMetrics() {
+            try {
+                // Load performance metrics
+                const metricsResponse = await fetch(`${API_BASE}/api/feedback/metrics`);
+                const metrics = await metricsResponse.json();
+
+                // Update display
+                document.getElementById('totalFeedback').textContent = metrics.total_feedback;
+                document.getElementById('accuracy').textContent = (metrics.accuracy * 100).toFixed(2) + '%';
+                document.getElementById('precision').textContent = (metrics.precision * 100).toFixed(2) + '%';
+                document.getElementById('recall').textContent = (metrics.recall * 100).toFixed(2) + '%';
+                document.getElementById('f1Score').textContent = metrics.f1_score.toFixed(4);
+
+                // F1 Score interpretation
+                const f1 = metrics.f1_score;
+                let f1Description = '';
+                if (f1 >= 0.9) f1Description = '🎉 Excellent performance!';
+                else if (f1 >= 0.7) f1Description = '✅ Good performance';
+                else if (f1 >= 0.5) f1Description = '⚠️ Moderate performance';
+                else f1Description = '❌ Needs improvement';
+                document.getElementById('f1Description').textContent = f1Description;
+
+                // Confusion matrix
+                document.getElementById('truePositives').textContent = metrics.true_positives;
+                document.getElementById('falsePositives').textContent = metrics.false_positives;
+                document.getElementById('trueNegatives').textContent = metrics.true_negatives;
+                document.getElementById('falseNegatives').textContent = metrics.false_negatives;
+
+                // Load feedback stats
+                const statsResponse = await fetch(`${API_BASE}/api/feedback/stats`);
+                const stats = await statsResponse.json();
+
+                const feedbackStatsDiv = document.getElementById('feedbackStats');
+                const correctCount = stats.correct_count !== undefined ? stats.correct_count : (stats.by_type ? (stats.by_type.true_positive || 0) + (stats.by_type.true_negative || 0) : 0);
+                const incorrectCount = stats.incorrect_count !== undefined ? stats.incorrect_count : (stats.by_type ? (stats.by_type.false_positive || 0) + (stats.by_type.false_negative || 0) + (stats.by_type.uncertain || 0) : 0);
+                const correctPct = stats.correct_percentage !== undefined ? stats.correct_percentage : (stats.total_feedback > 0 ? (correctCount / stats.total_feedback * 100) : 0);
+                const incorrectPct = stats.incorrect_percentage !== undefined ? stats.incorrect_percentage : (stats.total_feedback > 0 ? (incorrectCount / stats.total_feedback * 100) : 0);
+
+                feedbackStatsDiv.innerHTML = `
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <div class="detail-label">Total Feedback</div>
+                            <div class="detail-value">${stats.total_feedback}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Correct Classifications</div>
+                            <div class="detail-value">${correctCount} (${correctPct.toFixed(1)}%)</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Incorrect Classifications</div>
+                            <div class="detail-value">${incorrectCount} (${incorrectPct.toFixed(1)}%)</div>
+                        </div>
+                    </div>
+                `;
+
+            } catch (error) {
+                console.error('Error loading metrics:', error);
+                alert('Error loading metrics. Please try again.');
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Threat Analysis Agent - Dashboard</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1>🧠 Threat Analysis Agent</h1>
+                <p class="subtitle">AI-Powered Threat Intelligence Analysis</p>
+            </div>
+            <div class="header-actions">
+                <a href="/metrics.html" class="btn btn-secondary" style="text-decoration: none; margin-right: 10px;">📊 Metrics</a>
+                <button class="btn btn-secondary" onclick="refreshData()">🔄 Refresh</button>
+            </div>
+        </header>
+
+        <!-- Stats Cards -->
+        <div class="stats-grid" id="statsGrid">
+            <div class="stat-card">
+                <div class="stat-icon">📊</div>
+                <div class="stat-content">
+                    <div class="stat-value" id="totalIndicators">0</div>
+                    <div class="stat-label">Total Indicators</div>
+                </div>
+            </div>
+            <div class="stat-card stat-card-danger">
+                <div class="stat-icon">🔴</div>
+                <div class="stat-content">
+                    <div class="stat-value" id="highRisk">0</div>
+                    <div class="stat-label">High Risk</div>
+                </div>
+            </div>
+            <div class="stat-card stat-card-warning">
+                <div class="stat-icon">🟡</div>
+                <div class="stat-content">
+                    <div class="stat-value" id="mediumRisk">0</div>
+                    <div class="stat-label">Medium Risk</div>
+                </div>
+            </div>
+            <div class="stat-card stat-card-success">
+                <div class="stat-icon">🟢</div>
+                <div class="stat-content">
+                    <div class="stat-value" id="lowRisk">0</div>
+                    <div class="stat-label">Low Risk</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Upload Section -->
+        <div class="upload-section">
+            <h2>📤 Upload Threat Indicators</h2>
+            <div class="upload-area" id="uploadArea">
+                <input type="file" id="fileInput" accept=".csv" hidden>
+                <div class="upload-content">
+                    <div class="upload-icon">📁</div>
+                    <p class="upload-text">Drag & drop your CSV file here or click to browse</p>
+                    <p class="upload-hint">Supports CSV files with threat indicators (max 10MB)</p>
+                    <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">
+                        Choose File
+                    </button>
+                </div>
+            </div>
+            <div class="upload-options">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="enrichCheckbox" checked>
+                    <span>Auto-enrich indicators</span>
+                </label>
+                <label class="checkbox-label">
+                    <input type="checkbox" id="classifyCheckbox" checked>
+                    <span>Auto-classify with AI</span>
+                </label>
+            </div>
+            <div id="uploadProgress" class="upload-progress hidden">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <p class="progress-text" id="progressText">Uploading...</p>
+            </div>
+            <div id="uploadResult" class="upload-result hidden"></div>
+        </div>
+
+        <!-- Filters -->
+        <div class="filters-section">
+            <h2>🔍 Filter & Search</h2>
+            <div class="filters-grid">
+                <div class="filter-group">
+                    <label>Search</label>
+                    <input type="text" id="searchInput" placeholder="Search indicators..." class="input">
+                </div>
+                <div class="filter-group">
+                    <label>Type</label>
+                    <select id="typeFilter" class="input">
+                        <option value="">All Types</option>
+                        <option value="domain">Domain</option>
+                        <option value="ip">IP Address</option>
+                        <option value="hash">Hash</option>
+                        <option value="url">URL</option>
+                        <option value="email">Email</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Risk Level</label>
+                    <select id="riskFilter" class="input">
+                        <option value="">All Levels</option>
+                        <option value="high">High Risk</option>
+                        <option value="medium">Medium Risk</option>
+                        <option value="low">Low Risk</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>&nbsp;</label>
+                    <button class="btn btn-primary" onclick="applyFilters()">Apply Filters</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Indicators Table -->
+        <div class="table-section">
+            <div class="table-header">
+                <h2>📋 Threat Indicators</h2>
+                <div class="table-actions">
+                    <span id="tableCount" class="table-count">0 indicators</span>
+                </div>
+            </div>
+            <div class="table-container">
+                <table class="indicators-table">
+                    <thead>
+                        <tr>
+                            <th>Type</th>
+                            <th>Value</th>
+                            <th>Risk</th>
+                            <th>Score</th>
+                            <th>Enrichments</th>
+                            <th>Source</th>
+                            <th>Created</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="indicatorsTableBody">
+                        <tr>
+                            <td colspan="8" class="loading-cell">
+                                <div class="loading">Loading indicators...</div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="pagination" id="pagination">
+                <button class="btn btn-sm" onclick="previousPage()" id="prevBtn">Previous</button>
+                <span id="pageInfo">Page 1 of 1</span>
+                <button class="btn btn-sm" onclick="nextPage()" id="nextBtn">Next</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Indicator Details -->
+    <div id="detailModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Indicator Details</h2>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Details will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>

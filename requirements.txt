@@ -1,0 +1,51 @@
+# Core Framework
+fastapi
+uvicorn[standard]
+pydantic
+pydantic-settings
+
+# Database
+sqlalchemy
+alembic
+
+# LangChain and LLM
+langchain
+langchain-openai
+langchain-core
+langgraph
+openai
+
+# HTTP Clients
+httpx
+requests
+aiohttp
+aiofiles
+certifi  # For SSL certificate verification
+
+# Data Processing
+pandas
+numpy
+python-multipart
+
+# Configuration
+pyyaml
+python-dotenv
+
+# Scheduling (for autonomous mode)
+apscheduler
+
+# Utilities
+python-dateutil
+validators
+tldextract
+
+# Development & Testing
+pytest
+pytest-asyncio
+pytest-cov
+black
+flake8
+mypy
+
+# Logging
+python-json-logger

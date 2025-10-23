@@ -1,0 +1,78 @@
+# Threat Analysis Agent Configuration
+
+# Application Settings
+app:
+  name: "Threat Analysis Agent"
+  version: "1.0.0"
+  debug: true
+  host: "0.0.0.0"
+  port: 8000
+
+# Database Configuration
+database:
+  type: "sqlite"
+  path: "threat_intelligence.db"
+  echo: false  # Set to true to see SQL queries in logs
+
+# OpenAI Configuration
+openai:
+  model: "gpt-4o-mini"  # or gpt-4o for better reasoning
+  temperature: 0.3
+  max_tokens: 2000
+
+# Classification Thresholds
+classification:
+  high_risk_threshold: 7.0
+  medium_risk_threshold: 4.0
+  concurrent_limit: 10  # Max concurrent classification tasks
+  # Score ranges: 0-10 scale
+  # 7-10: High Risk
+  # 4-6.9: Medium Risk
+  # 0-3.9: Low Risk
+
+# Enrichment Configuration
+enrichment:
+  timeout: 30  # seconds
+  max_retries: 3
+  retry_delay: 2  # seconds
+  concurrent_limit: 5  # max concurrent enrichment tasks
+
+# API Data Sources (for autonomous mode)
+data_sources:
+  phishtank:
+    url: "http://data.phishtank.com/data/online-valid.json"
+    enabled: true
+    rate_limit: 10  # requests per minute
+  
+  abuseipdb:
+    url: "https://api.abuseipdb.com/api/v2/blacklist"
+    enabled: false  # Set to true when you have API key
+    api_key: "${ABUSEIPDB_API_KEY}"  # Set in environment
+    rate_limit: 60
+  
+  malwarebazaar:
+    url: "https://mb-api.abuse.ch/api/v1/"
+    enabled: true
+    rate_limit: 100
+
+# Scheduler Configuration (autonomous mode)
+scheduler:
+  enabled: false  # Enable for autonomous mode
+  interval_minutes: 60  # Run every hour
+  max_indicators_per_run: 100
+
+# Logging Configuration
+logging:
+  level: "INFO"  # DEBUG, INFO, WARNING, ERROR, CRITICAL
+  format: "json"  # json or text
+  file: "logs/threat_agent.log"
+  max_bytes: 10485760  # 10MB
+  backup_count: 5
+
+# CORS Settings (for UI)
+cors:
+  enabled: true
+  origins:
+    - "http://localhost:8000"
+    - "http://127.0.0.1:8000"
+    - "http://localhost:3000"
