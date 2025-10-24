@@ -66,6 +66,7 @@ graph TB
         UI[Web UI<br/>HTML/CSS/JS]
         API[FastAPI Backend<br/>REST APIs]
         CSV[CSV Upload]
+        JSON_UP[JSON Upload]
         MANUAL[Manual Entry]
     end
 
@@ -111,8 +112,10 @@ graph TB
 
     %% Data Flow
     UI --> CSV
+    UI --> JSON_UP
     UI --> MANUAL
     CSV --> API
+    JSON_UP --> API
     MANUAL --> API
     API --> START
     
@@ -162,7 +165,7 @@ graph TB
     classDef storageStyle fill:#fce4ec,stroke:#880e4f,stroke-width:2px
     classDef metricsStyle fill:#e0f2f1,stroke:#004d40,stroke-width:2px
     
-    class UI,API,CSV,MANUAL ingestStyle
+    class UI,API,CSV,JSON_UP,MANUAL ingestStyle
     class START,PARSE,FEEDBACK,STORE,END agentStyle
     class ENRICH_ORCHESTRATOR,WHOIS,IP_REP,HASH,GEO enrichStyle
     class CLASSIFY,RISK,CONFIDENCE classifyStyle
@@ -337,18 +340,6 @@ venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-### Step 4: Verify Installation
-
-```bash
-# Run verification script
-python verify_installation.py
-```
-
-Expected output:
-```
-✅ All 45 required files found and verified!
-✅ Installation is complete and ready to use!
-```
 
 ---
 
@@ -394,160 +385,6 @@ LOG_FORMAT=json
 
 **Important**: Keep your API key secure and never commit it to version control!
 
-### Configuration File (config.yaml)
-
-The `config.yaml` file contains all application settings. Here's the complete configuration with explanations:
-
-```yaml
-# ========================================
-# Application Configuration
-# ========================================
-app:
-  name: "Threat Analysis Agent"
-  version: "1.0.0"
-  debug: false                    # Enable debug mode (verbose logging)
-  host: "0.0.0.0"                # Listen on all interfaces
-  port: 8000                      # Default HTTP port
-
-# ========================================
-# Database Configuration
-# ========================================
-database:
-  type: "sqlite"                  # Database type (currently only SQLite)
-  path: "threat_intelligence.db"  # Database file path
-  echo: false                     # Log SQL queries (set true for debugging)
-
-# ========================================
-# OpenAI / LLM Configuration
-# ========================================
-openai:
-  model: "gpt-4o-mini"            # Model: gpt-4o-mini (faster/cheaper) or gpt-4 (more accurate)
-  temperature: 0.3                # Low temp for consistency (0.0-1.0)
-  max_tokens: 2000                # Max response length
-
-# ========================================
-# Classification Configuration
-# ========================================
-classification:
-  high_risk_threshold: 7.0        # Score >= 7.0 classified as HIGH
-  medium_risk_threshold: 4.0      # Score 4.0-6.9 classified as MEDIUM
-                                  # Score < 4.0 classified as LOW
-  concurrent_limit: 10            # Max concurrent classification tasks
-
-# ========================================
-# Enrichment Configuration
-# ========================================
-enrichment:
-  timeout: 30                     # Timeout per enricher (seconds)
-  max_retries: 3                  # Number of retry attempts
-  retry_delay: 2                  # Delay between retries (seconds)
-  concurrent_limit: 5             # Max concurrent enrichment tasks
-
-# ========================================
-# Data Sources Configuration
-# ========================================
-data_sources:
-  phishtank:
-    enabled: true
-    feed_url: "https://data.phishtank.com/data/online-valid.csv"
-    rate_limit: 10                # Requests per minute
-
-  abuseipdb:
-    enabled: false                # Requires API key (set ABUSEIPDB_API_KEY in .env)
-    rate_limit: 1000              # Free tier: 1000/day
-
-  malwarebazaar:
-    enabled: true
-    api_url: "https://mb-api.abuse.ch/api/v1/"
-    rate_limit: 100               # Requests per minute
-
-# ========================================
-# Scheduler Configuration (Autonomous Mode)
-# ========================================
-scheduler:
-  enabled: false                  # Enable autonomous scheduled runs
-  interval_minutes: 60            # Run every N minutes
-  max_indicators_per_run: 100     # Limit indicators per run
-
-# ========================================
-# Logging Configuration
-# ========================================
-logging:
-  level: "INFO"                   # DEBUG, INFO, WARNING, ERROR, CRITICAL
-  format: "json"                  # json or text
-  file: "logs/threat_agent.log"   # Log file path
-  max_bytes: 10485760             # 10MB max file size
-  backup_count: 5                 # Keep 5 backup files
-
-# ========================================
-# CORS Configuration
-# ========================================
-cors:
-  enabled: true
-  origins:
-    - "http://localhost:8000"
-    - "http://127.0.0.1:8000"
-    - "http://localhost:3000"     # For frontend development
-```
-
-### Configuration Loading
-
-The configuration is loaded at application startup via `app/config.py`:
-
-```python
-from pydantic_settings import BaseSettings
-from pydantic import Field
-from typing import List
-import yaml
-
-class Config(BaseSettings):
-    """Application configuration loaded from config.yaml and environment variables"""
-
-    class AppConfig(BaseSettings):
-        name: str = "Threat Analysis Agent"
-        version: str = "1.0.0"
-        debug: bool = False
-        host: str = "0.0.0.0"
-        port: int = 8000
-
-    class DatabaseConfig(BaseSettings):
-        type: str = "sqlite"
-        path: str = "threat_intelligence.db"
-        echo: bool = False
-
-    class OpenAIConfig(BaseSettings):
-        model: str = Field(default="gpt-4o-mini")
-        temperature: float = Field(default=0.3, ge=0.0, le=1.0)
-        max_tokens: int = Field(default=2000, gt=0)
-
-    class ClassificationConfig(BaseSettings):
-        high_risk_threshold: float = 7.0
-        medium_risk_threshold: float = 4.0
-        concurrent_limit: int = 10
-
-    class EnrichmentConfig(BaseSettings):
-        timeout: int = 30
-        max_retries: int = 3
-        retry_delay: int = 2
-        concurrent_limit: int = 5
-
-    # Configuration sections
-    app: AppConfig
-    database: DatabaseConfig
-    openai: OpenAIConfig
-    classification: ClassificationConfig
-    enrichment: EnrichmentConfig
-
-    @classmethod
-    def load_from_file(cls, config_path: str = "config.yaml") -> "Config":
-        """Load configuration from YAML file"""
-        with open(config_path, "r") as f:
-            config_dict = yaml.safe_load(f)
-        return cls(**config_dict)
-
-# Global config instance
-config = Config.load_from_file()
-```
 
 ### Environment Variable Overrides
 
@@ -648,6 +485,7 @@ http://localhost:8000/api
 |--------|----------|-------------|
 | **POST** | `/api/ingest` | Submit single indicator for ingestion |
 | **POST** | `/api/ingest/upload-csv` | Upload CSV file with multiple indicators |
+| **POST** | `/api/ingest/upload-json` | Upload JSON file with multiple indicators |
 | **POST** | `/api/classify/{indicator_id}` | Classify specific indicator (run LangGraph agent) |
 | **POST** | `/api/classify/batch` | Batch classify multiple indicators |
 | **GET** | `/api/classify/stats` | Get classification statistics |
@@ -1032,27 +870,83 @@ The system supports multiple methods for ingesting threat indicators.
 4. Click "Submit"
 5. The indicator will be automatically classified
 
-### Method 2: CSV Upload (Batch)
+### Method 2: File Upload (CSV or JSON) - Batch
+
+The system supports both **CSV** and **JSON** file uploads for batch indicator ingestion.
+
+#### Option A: CSV Upload
+
+**Endpoint**: `POST /api/ingest/upload-csv`
 
 **CSV Format**:
 ```csv
-value,type,source,metadata
-192.168.1.100,ip,firewall,"{\"severity\":\"high\"}"
-example.com,domain,proxy,"{\"category\":\"phishing\"}"
-44d88612fea8a8f36de82e1278abb02f,hash,endpoint,"{\"filename\":\"malware.exe\"}"
+value,indicator_type,source,tags,notes
+192.168.1.100,ip,firewall,"scanning,ssh","Multiple SSH attempts"
+example.com,domain,proxy,"phishing","Reported by user"
+44d88612fea8a8f36de82e1278abb02f,hash,endpoint,"malware","Detected on workstation"
 ```
 
 **Via Web UI**:
 1. Navigate to http://localhost:8000
-2. Click "Upload CSV"
+2. Click "Upload File" tab
 3. Select your CSV file
-4. Click "Upload"
-5. All indicators will be processed automatically
+4. Choose options:
+   - ☑️ **Auto-enrich**: Automatically enrich all indicators
+   - ☑️ **Auto-classify**: Automatically classify all indicators
+5. Click "Upload CSV File"
+6. View statistics: created, updated, failed counts
 
 **Via cURL**:
 ```bash
-curl -X POST http://localhost:8000/api/v1/ingest/batch \
-  -F "file=@your_indicators.csv"
+curl -X POST "http://localhost:8000/api/ingest/upload-csv?enrich=true&classify=true" \
+  -F "file=@indicators.csv"
+```
+
+#### Option B: JSON Upload
+
+**Endpoint**: `POST /api/ingest/upload-json`
+
+**JSON Format (Array of Objects)**:
+```json
+[
+  {
+    "value": "evil-domain.com",
+    "indicator_type": "domain",
+    "source": "manual",
+    "tags": ["phishing", "malware"],
+    "notes": "Reported by user"
+  },
+  {
+    "value": "192.0.2.1",
+    "indicator_type": "ip",
+    "source": "feed",
+    "tags": ["scanning"]
+  }
+]
+```
+
+**JSON Format (Single Object)**:
+```json
+{
+  "value": "44d88612fea8a8f36de82e1278abb02f",
+  "indicator_type": "hash",
+  "source": "endpoint",
+  "tags": ["malware"],
+  "notes": "Detected on workstation"
+}
+```
+
+**Via Web UI**:
+1. Navigate to http://localhost:8000
+2. Click "Upload File" tab
+3. Select your JSON file
+4. Choose enrichment/classification options
+5. Click "Upload JSON File"
+
+**Via cURL**:
+```bash
+curl -X POST "http://localhost:8000/api/ingest/upload-json?enrich=true&classify=true" \
+  -F "file=@indicators.json"
 ```
 
 ### Method 3: REST API (Programmatic)
@@ -1063,80 +957,78 @@ import requests
 
 # Single indicator
 response = requests.post(
-    "http://localhost:8000/api/v1/ingest/single",
+    "http://localhost:8000/api/ingest/submit",
     json={
         "value": "192.168.1.100",
-        "type": "ip",
-        "source": "python_script"
-    }
+        "indicator_type": "ip",
+        "source": "python_script",
+        "tags": ["scanning"],
+        "notes": "Detected port scan"
+    },
+    params={"enrich": True, "classify": True}
 )
 indicator = response.json()
-print(f"Indicator ID: {indicator['id']}")
+print(f"Indicator ID: {indicator['id']}, Risk: {indicator.get('risk_level')}")
 
-# Batch upload
+# CSV upload
 with open("indicators.csv", "rb") as f:
     response = requests.post(
-        "http://localhost:8000/api/v1/ingest/batch",
+        "http://localhost:8000/api/ingest/upload-csv?enrich=true&classify=true",
         files={"file": f}
     )
     result = response.json()
-    print(f"Uploaded {result['successful']} indicators")
+    print(f"Uploaded: {result['indicators_created']} created, {result['indicators_updated']} updated")
+
+# JSON upload
+with open("indicators.json", "rb") as f:
+    response = requests.post(
+        "http://localhost:8000/api/ingest/upload-json?enrich=true&classify=true",
+        files={"file": f}
+    )
+    result = response.json()
+    print(f"Uploaded: {result['indicators_created']} created, {result['indicators_updated']} updated")
 ```
 
 **JavaScript Example**:
 ```javascript
 // Single indicator
-fetch('http://localhost:8000/api/v1/ingest/single', {
+fetch('http://localhost:8000/api/ingest/submit?enrich=true&classify=true', {
     method: 'POST',
     headers: {
         'Content-Type': 'application/json'
     },
     body: JSON.stringify({
         value: '192.168.1.100',
-        type: 'ip',
-        source: 'javascript_app'
+        indicator_type: 'ip',
+        source: 'javascript_app',
+        tags: ['scanning'],
+        notes: 'Detected from firewall logs'
     })
 })
 .then(response => response.json())
-.then(data => console.log('Indicator ID:', data.id));
+.then(data => console.log(`Created: ${data.id}, Risk: ${data.risk_level}`));
 
 // CSV upload
-const formData = new FormData();
-formData.append('file', fileInput.files[0]);
+const csvFormData = new FormData();
+csvFormData.append('file', csvFileInput.files[0]);
 
-fetch('http://localhost:8000/api/v1/ingest/batch', {
+fetch('http://localhost:8000/api/ingest/upload-csv?enrich=true&classify=true', {
     method: 'POST',
-    body: formData
+    body: csvFormData
 })
 .then(response => response.json())
-.then(data => console.log(`Uploaded ${data.successful} indicators`));
-```
+.then(data => console.log(`Uploaded ${data.indicators_created} indicators from CSV`));
 
-### Method 4: Integration with SIEM/SOAR
+// JSON upload
+const jsonFormData = new FormData();
+jsonFormData.append('file', jsonFileInput.files[0]);
 
-**Splunk Integration Example**:
-```python
-# Splunk alert action script
-import sys
-import requests
-
-# Read alert data from stdin
-alert_data = sys.stdin.read()
-indicator = extract_indicator(alert_data)
-
-# Send to Threat Analysis Agent
-requests.post(
-    "http://threat-agent:8000/api/v1/ingest/single",
-    json={
-        "value": indicator,
-        "type": "ip",
-        "source": "splunk_alert",
-        "metadata": {
-            "alert_id": alert_data['sid'],
-            "severity": alert_data['severity']
-        }
-    }
-)
+fetch('http://localhost:8000/api/ingest/upload-json?enrich=true&classify=true', {
+    method: 'POST',
+    body: jsonFormData
+})
+.then(response => response.json())
+.then(data => console.log(`Uploaded ${data.indicators_created} indicators from JSON`));
 ```
 
 **Sample Data**
@@ -1349,87 +1241,71 @@ The system uses **LangGraph** to orchestrate the analysis workflow as a **Plan �
 
 ### Complete LangGraph Workflow (Actual Implementation)
 
+**Visual Workflow Diagram:**
+
 ```mermaid
-graph TB
+graph LR
     START([START])
 
-    subgraph "Input State"
-        INPUT[Initial State<br/>────────────<br/>• indicator: dict<br/>• enrichments: list<br/>• observations: []<br/>• classification: None]
-    end
-
-    subgraph "PLAN NODE"
-        PLAN_START[Plan Node Entry]
-        PLAN_PROCESS[Create Analysis Plan<br/>────────────<br/>• Extract indicator type & value<br/>• Count enrichment sources<br/>• List enrichment types<br/>• Build plan string]
-        PLAN_OUTPUT[Plan Output<br/>────────────<br/>plan: str<br/>Example: 'Analyzing ip indicator: 192.168.1.1<br/>| Available enrichment data: 2 sources<br/>| Enrichment types: abuseipdb, openphish']
-
-        PLAN_START --> PLAN_PROCESS --> PLAN_OUTPUT
-    end
-
-    subgraph "OBSERVE NODE"
-        OBS_START[Observe Node Entry]
-        OBS_LOOP[Loop Through Enrichments]
-
-        subgraph "Observation Extraction"
-            CHECK_TYPE{Check<br/>Enrichment<br/>Type}
-
-            WHOIS_OBS[WHOIS Observations<br/>────────────<br/>• Domain age analysis<br/>• Registrar info<br/>• Country risk assessment<br/>• DNSSEC status]
-
-            IP_OBS[IP Reputation Observations<br/>────────────<br/>• Abuse confidence score<br/>• Total reports count<br/>• Abuse categories<br/>• Tor/Proxy detection<br/>• ISP & usage type]
-
-            HASH_OBS[Hash Lookup Observations<br/>────────────<br/>• Detection ratio analysis<br/>• Malware families<br/>• File type<br/>• Is malware confirmation]
-
-            GENERIC_OBS[Generic Observations<br/>────────────<br/>• enrichment_type: score=X]
-        end
-
-        OBS_OUTPUT[Observations Output<br/>────────────<br/>observations: List[str]<br/>Example:<br/>['High abuse confidence 92% - CRITICAL'<br/> 'Multiple abuse reports 156'<br/> 'Tor exit node detected'<br/> 'IP reputation score: 8.5/10']]
-
-        OBS_START --> OBS_LOOP --> CHECK_TYPE
-        CHECK_TYPE -->|whois| WHOIS_OBS --> OBS_OUTPUT
-        CHECK_TYPE -->|ip_reputation| IP_OBS --> OBS_OUTPUT
-        CHECK_TYPE -->|hash_lookup| HASH_OBS --> OBS_OUTPUT
-        CHECK_TYPE -->|other| GENERIC_OBS --> OBS_OUTPUT
-    end
-
-    subgraph "REASON NODE"
-        REASON_START[Reason Node Entry]
-
-        CALC_SCORES[Calculate Scores<br/>────────────<br/>• avg_score = mean of all scores<br/>• max_score = highest score<br/>• final_score = max_score<br/>Rationale: Anchor to strongest signal]
-
-        BUILD_PROMPT[Build LLM Prompts<br/>────────────<br/>System Prompt:<br/>- Expert cybersecurity analyst<br/>- Risk classification guidelines<br/>- HIGH: 7.0-10.0<br/>- MEDIUM: 4.0-6.9<br/>- LOW: 0.0-3.9<br/><br/>User Prompt:<br/>- Indicator details<br/>- Enrichment scores<br/>- All observations<br/>- Risk baseline guidance]
-
-        LLM_CALL[Call OpenAI LLM<br/>────────────<br/>Model: gpt-4o-mini or gpt-4<br/>Temperature: 0.3<br/>With JSON Output Parser<br/>Expected Structure:<br/>ClassificationOutput]
-
-        PARSE_RESP[Parse LLM Response<br/>────────────<br/>Extract:<br/>• risk_level: str<br/>• risk_score: float<br/>• confidence: float<br/>• reasoning: str<br/>• key_factors: List[str]]
-
-        ALIGN_SCORE[Align Risk Score<br/>────────────<br/>Override LLM score with max_score<br/>to prioritize enrichment evidence<br/><br/>Determine final risk_level:<br/>if score >= 7.0 → HIGH<br/>if score >= 4.0 → MEDIUM<br/>else → LOW]
-
-        ADD_META[Add Metadata<br/>────────────<br/>• model: model_name<br/>• enrichment_score_avg<br/>• enrichment_score_max<br/>• classified_at: timestamp]
-
-        REASON_OUTPUT[Classification Output<br/>────────────<br/>classification: dict<br/>Example:<br/>risk_level: 'high'<br/>risk_score: 8.5<br/>confidence: 0.95<br/>reasoning: 'High abuse confidence...'<br/>key_factors: ['Abuse score 92%', ...]<br/>model: 'gpt-4o-mini']
-
-        REASON_START --> CALC_SCORES --> BUILD_PROMPT --> LLM_CALL
-        LLM_CALL --> PARSE_RESP --> ALIGN_SCORE --> ADD_META --> REASON_OUTPUT
-    end
+    PLAN[PLAN NODE<br/>Create Analysis Strategy]
+    OBSERVE[OBSERVE NODE<br/>Extract Observations]
+    REASON[REASON NODE<br/>LLM Classification]
 
     END([END])
 
-    START --> INPUT
-    INPUT --> PLAN_START
-    PLAN_OUTPUT --> OBS_START
-    OBS_OUTPUT --> REASON_START
-    REASON_OUTPUT --> END
+    START --> PLAN
+    PLAN --> OBSERVE
+    OBSERVE --> REASON
+    REASON --> END
 
-    classDef inputStyle fill:#e1f5ff,stroke:#01579b,stroke-width:2px
-    classDef planStyle fill:#fff3e0,stroke:#e65100,stroke-width:2px
-    classDef observeStyle fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
-    classDef reasonStyle fill:#e8f5e9,stroke:#1b5e20,stroke-width:2px
-    classDef outputStyle fill:#fce4ec,stroke:#880e4f,stroke-width:2px
+    style PLAN fill:#fff3e0,stroke:#e65100,stroke-width:3px
+    style OBSERVE fill:#f3e5f5,stroke:#4a148c,stroke-width:3px
+    style REASON fill:#e8f5e9,stroke:#1b5e20,stroke-width:3px
+    style START fill:#e1f5ff,stroke:#01579b,stroke-width:2px
+    style END fill:#fce4ec,stroke:#880e4f,stroke-width:2px
+```
 
-    class INPUT inputStyle
-    class PLAN_START,PLAN_PROCESS,PLAN_OUTPUT planStyle
-    class OBS_START,OBS_LOOP,CHECK_TYPE,WHOIS_OBS,IP_OBS,HASH_OBS,GENERIC_OBS,OBS_OUTPUT observeStyle
-    class REASON_START,CALC_SCORES,BUILD_PROMPT,LLM_CALL,PARSE_RESP,ALIGN_SCORE,ADD_META,REASON_OUTPUT reasonStyle
-    class END outputStyle
+**Detailed Node Breakdown:**
+
+```mermaid
+graph TB
+    subgraph PLAN[PLAN NODE]
+        P1[Extract indicator metadata]
+        P2[Count enrichment sources]
+        P3[List enrichment types]
+        P4[Build plan string]
+        P1 --> P2 --> P3 --> P4
+    end
+
+    subgraph OBSERVE[OBSERVE NODE]
+        O1[Loop through enrichments]
+        O2{Check type}
+        O3[WHOIS: domain age, registrar]
+        O4[IP Rep: abuse score, Tor]
+        O5[Hash: malware detection]
+        O6[Compile observations list]
+        O1 --> O2
+        O2 -->|whois| O3 --> O6
+        O2 -->|ip_reputation| O4 --> O6
+        O2 -->|hash_lookup| O5 --> O6
+    end
+
+    subgraph REASON[REASON NODE]
+        R1[Calculate avg and max scores]
+        R2[Build system and user prompts]
+        R3[Call OpenAI LLM]
+        R4[Parse JSON response]
+        R5[Align score to max_score]
+        R6[Add metadata]
+        R1 --> R2 --> R3 --> R4 --> R5 --> R6
+    end
+
+    PLAN --> OBSERVE
+    OBSERVE --> REASON
+
+    style PLAN fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    style OBSERVE fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+    style REASON fill:#e8f5e9,stroke:#1b5e20,stroke-width:2px
 ```
 
 ### Simplified State Machine Overview
@@ -1543,31 +1419,6 @@ Stores all ingested threat indicators with metadata.
 - `idx_indicators_first_seen` on `first_seen`
 - `idx_indicators_is_active` on `is_active`
 
-**ORM Model** (`app/storage/models.py`):
-```python
-class Indicator(Base):
-    __tablename__ = "indicators"
-
-    id = Column(Integer, primary_key=True)
-    indicator_type = Column(Enum(IndicatorType), nullable=False)
-    value = Column(String, unique=True, nullable=False)
-    source_type = Column(String)
-    source_name = Column(String)
-    source_url = Column(String)
-    first_seen = Column(DateTime)
-    last_seen = Column(DateTime)
-    raw_data = Column(JSON)
-    tags = Column(JSON)  # List[str]
-    notes = Column(Text)
-    is_active = Column(Boolean, default=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-
-    # Relationships
-    enrichments = relationship("Enrichment", back_populates="indicator", cascade="all, delete-orphan")
-    classifications = relationship("Classification", back_populates="indicator", cascade="all, delete-orphan")
-    feedbacks = relationship("Feedback", back_populates="indicator", cascade="all, delete-orphan")
-```
 
 #### 2. `enrichments` Table
 Stores enrichment data from various threat intelligence sources.
@@ -1592,24 +1443,6 @@ Stores enrichment data from various threat intelligence sources.
 - `idx_enrichments_type` on `enrichment_type`
 - `idx_enrichments_enriched_at` on `enriched_at`
 
-**ORM Model**:
-```python
-class Enrichment(Base):
-    __tablename__ = "enrichments"
-
-    id = Column(Integer, primary_key=True)
-    indicator_id = Column(Integer, ForeignKey("indicators.id", ondelete="CASCADE"), nullable=False)
-    enrichment_type = Column(String, nullable=False)
-    provider = Column(String, nullable=False)
-    data = Column(JSON, nullable=False)
-    score = Column(Float)
-    enriched_at = Column(DateTime, default=datetime.utcnow)
-    success = Column(Boolean, default=True)
-    error_message = Column(Text)
-
-    # Relationship
-    indicator = relationship("Indicator", back_populates="enrichments")
-```
 
 #### 3. `classifications` Table
 Stores AI-powered classification results from the LangGraph agent.
@@ -1635,25 +1468,6 @@ Stores AI-powered classification results from the LangGraph agent.
 - `idx_classifications_risk_level` on `risk_level`
 - `idx_classifications_classified_at` on `classified_at`
 
-**ORM Model**:
-```python
-class Classification(Base):
-    __tablename__ = "classifications"
-
-    id = Column(Integer, primary_key=True)
-    indicator_id = Column(Integer, ForeignKey("indicators.id", ondelete="CASCADE"), nullable=False)
-    risk_level = Column(Enum(RiskLevel), nullable=False)
-    risk_score = Column(Float, nullable=False)
-    confidence = Column(Float, nullable=False)
-    reasoning = Column(Text)
-    factors = Column(JSON)  # List[str]
-    model_name = Column(String)
-    model_version = Column(String)
-    classified_at = Column(DateTime, default=datetime.utcnow)
-
-    # Relationship
-    indicator = relationship("Indicator", back_populates="classifications")
-```
 
 #### 4. `feedbacks` Table
 Stores human validation feedback for classification accuracy tracking.
@@ -1677,23 +1491,6 @@ Stores human validation feedback for classification accuracy tracking.
 - `idx_feedbacks_type` on `feedback_type`
 - `idx_feedbacks_created_at` on `created_at`
 
-**ORM Model**:
-```python
-class Feedback(Base):
-    __tablename__ = "feedbacks"
-
-    id = Column(Integer, primary_key=True)
-    indicator_id = Column(Integer, ForeignKey("indicators.id", ondelete="CASCADE"), nullable=False)
-    original_risk_level = Column(String)
-    feedback_type = Column(Enum(FeedbackType), nullable=False)
-    corrected_risk_level = Column(Enum(RiskLevel))
-    comment = Column(Text)
-    user_id = Column(String)
-    created_at = Column(DateTime, default=datetime.utcnow)
-
-    # Relationship
-    indicator = relationship("Indicator", back_populates="feedbacks")
-```
 
 #### 5. `agent_runs` Table
 Tracks autonomous agent execution history and statistics.
@@ -1752,35 +1549,6 @@ agent_runs (standalone, tracks execution history)
 - `true_negative` - Correctly identified as low risk
 - `false_negative` - Incorrectly identified as low risk
 - `correction` - General correction with new risk level
-
-### Sample Queries
-
-```sql
--- Get all malicious IPs
-SELECT i.value, c.risk_score, c.confidence
-FROM indicators i
-JOIN classifications c ON i.id = c.indicator_id
-WHERE i.type = 'ip' AND c.classification = 'malicious'
-ORDER BY c.risk_score DESC;
-
--- Calculate accuracy by indicator type
-SELECT 
-    i.type,
-    COUNT(*) as total,
-    SUM(CASE WHEN f.is_correct = 1 THEN 1 ELSE 0 END) as correct,
-    ROUND(AVG(CASE WHEN f.is_correct = 1 THEN 1.0 ELSE 0.0 END) * 100, 2) as accuracy
-FROM indicators i
-JOIN classifications c ON i.id = c.indicator_id
-JOIN feedback f ON i.id = f.indicator_id
-GROUP BY i.type;
-
--- Get indicators with low confidence that need review
-SELECT i.value, i.type, c.classification, c.confidence
-FROM indicators i
-JOIN classifications c ON i.id = c.indicator_id
-WHERE c.confidence < 0.7
-ORDER BY c.confidence ASC;
-```
 
 ---
 
