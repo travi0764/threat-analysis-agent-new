@@ -3,9 +3,10 @@ AbuseIPDB enricher for IP reputation checks.
 Requires ABUSEIPDB_API_KEY in environment/config.
 """
 
-from typing import Any, Dict
-import aiohttp
 import ssl
+from typing import Any, Dict
+
+import aiohttp
 import certifi
 
 from app.enrichment.base import BaseEnricher, EnrichmentResult
@@ -48,13 +49,14 @@ class AbuseIPDBEnricher(BaseEnricher):
             ssl_context = ssl.create_default_context(cafile=certifi.where())
             connector = aiohttp.TCPConnector(ssl=ssl_context)
 
-            self.logger.debug(
-                f"AbuseIPDB request for {indicator_value}"
-            )
+            self.logger.debug(f"AbuseIPDB request for {indicator_value}")
 
             async with aiohttp.ClientSession(connector=connector) as session:
                 async with session.get(
-                    self.base_url, headers=headers, params=params, timeout=aiohttp.ClientTimeout(total=30)
+                    self.base_url,
+                    headers=headers,
+                    params=params,
+                    timeout=aiohttp.ClientTimeout(total=30),
                 ) as response:
                     if response.status == 200:
                         result = await response.json()

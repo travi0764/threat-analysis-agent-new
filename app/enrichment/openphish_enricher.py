@@ -5,10 +5,11 @@ configurable period to avoid re-downloading it for every enrichment request.
 """
 
 import asyncio
+import ssl
 from datetime import datetime, timedelta
 from typing import Optional, Set
+
 import aiohttp
-import ssl
 import certifi
 
 from app.enrichment.base import BaseEnricher, EnrichmentResult
@@ -51,13 +52,11 @@ class OpenPhishEnricher(BaseEnricher):
             await self._ensure_feed_cache()
         except Exception as exc:
             self.logger.error("OpenPhish feed refresh failed: %s", exc)
-            return self._create_error_result(
-                f"Failed to refresh OpenPhish feed: {exc}"
-            )
+            return self._create_error_result(f"Failed to refresh OpenPhish feed: {exc}")
 
         # Normalize for comparison
         normalized = indicator_value.strip().lower()
-        
+
         # For domains, check if any URL in the feed contains this domain
         if indicator_type == IndicatorType.DOMAIN:
             listed = any(normalized in url for url in self._cache_urls)
@@ -86,20 +85,17 @@ class OpenPhishEnricher(BaseEnricher):
             # URLs that are in the feed are high risk
             return self._create_success_result(data, score=9.0)
 
-        data["message"] = (
-            "Not present in OpenPhish community feed at last refresh"
-        )
-        # Not seeing the URL is not proof of safety; return neutral score
-        return self._create_success_result(data, score=0.0)
+        data["message"] = "Not present in OpenPhish community feed at last refresh"
+        # Not seeing the URL is a valid finding - return successful result with no score
+        return self._create_success_result(data, score=None)
 
     async def _ensure_feed_cache(self) -> None:
         """
         Refresh the feed cache if the TTL has elapsed.
         """
         now = datetime.utcnow()
-        if (
-            self._cache_fetched_at
-            and now - self._cache_fetched_at < timedelta(seconds=self.cache_ttl_seconds)
+        if self._cache_fetched_at and now - self._cache_fetched_at < timedelta(
+            seconds=self.cache_ttl_seconds
         ):
             return
 

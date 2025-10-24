@@ -2,12 +2,13 @@
 Helper utilities for Threat Analysis Agent.
 """
 
-import re
 import hashlib
+import re
 from typing import Optional, Tuple
 from urllib.parse import urlparse
-import validators
+
 import tldextract
+import validators
 
 from app.storage.models import IndicatorType
 from app.utils.exceptions import ValidationError
@@ -16,93 +17,93 @@ from app.utils.exceptions import ValidationError
 def detect_indicator_type(value: str) -> IndicatorType:
     """
     Detect the type of indicator based on its value.
-    
+
     Args:
         value: The indicator value
-        
+
     Returns:
         IndicatorType enum value
-        
+
     Raises:
         ValidationError: If indicator type cannot be determined
     """
     value = value.strip().lower()
-    
+
     # Check for hash (MD5, SHA1, SHA256)
-    if re.match(r'^[a-f0-9]{32}$', value):
+    if re.match(r"^[a-f0-9]{32}$", value):
         return IndicatorType.HASH  # MD5
-    elif re.match(r'^[a-f0-9]{40}$', value):
+    elif re.match(r"^[a-f0-9]{40}$", value):
         return IndicatorType.HASH  # SHA1
-    elif re.match(r'^[a-f0-9]{64}$', value):
+    elif re.match(r"^[a-f0-9]{64}$", value):
         return IndicatorType.HASH  # SHA256
-    
+
     # Check for IP address
     if validators.ipv4(value) or validators.ipv6(value):
         return IndicatorType.IP
-    
+
     # Check for email
     if validators.email(value):
         return IndicatorType.EMAIL
-    
+
     # Check for URL
     if validators.url(value):
         return IndicatorType.URL
-    
+
     # Check for domain
     if validators.domain(value):
         return IndicatorType.DOMAIN
-    
+
     raise ValidationError(f"Could not determine indicator type for: {value}")
 
 
 def normalize_indicator(value: str, indicator_type: IndicatorType) -> str:
     """
     Normalize an indicator value based on its type.
-    
+
     Args:
         value: The indicator value
         indicator_type: The type of indicator
-        
+
     Returns:
         Normalized indicator value
     """
     value = value.strip()
-    
+
     if indicator_type == IndicatorType.HASH:
         return value.lower()
-    
+
     elif indicator_type == IndicatorType.IP:
         return value.lower()
-    
+
     elif indicator_type == IndicatorType.DOMAIN:
         # Remove protocol if present
-        if '://' in value:
+        if "://" in value:
             value = urlparse(value).netloc or value
-        return value.lower().rstrip('.')
-    
+        return value.lower().rstrip(".")
+
     elif indicator_type == IndicatorType.URL:
         return value.lower()
-    
+
     elif indicator_type == IndicatorType.EMAIL:
         return value.lower()
-    
+
     return value
 
 
 def extract_domain_from_url(url: str) -> Optional[str]:
     """
     Extract domain from a URL.
-    
+
     Args:
         url: The URL
-        
+
     Returns:
         Domain name or None
     """
     try:
         parsed = urlparse(url)
         domain = parsed.netloc or parsed.path
-        return domain.lower().rstrip('.')
+        return domain.lower().rstrip(".")
     except Exception:
         return None
 
@@ -110,10 +111,10 @@ def extract_domain_from_url(url: str) -> Optional[str]:
 def get_tld_info(domain: str) -> dict:
     """
     Extract TLD information from a domain.
-    
+
     Args:
         domain: Domain name
-        
+
     Returns:
         Dictionary with subdomain, domain, and suffix
     """
@@ -132,11 +133,11 @@ def get_tld_info(domain: str) -> dict:
 def calculate_hash(data: str, algorithm: str = "sha256") -> str:
     """
     Calculate hash of data.
-    
+
     Args:
         data: Data to hash
         algorithm: Hash algorithm (md5, sha1, sha256)
-        
+
     Returns:
         Hexadecimal hash string
     """
@@ -153,11 +154,11 @@ def calculate_hash(data: str, algorithm: str = "sha256") -> str:
 def validate_csv_row(row: dict, required_fields: list) -> bool:
     """
     Validate a CSV row has all required fields.
-    
+
     Args:
         row: Dictionary representing a CSV row
         required_fields: List of required field names
-        
+
     Returns:
         True if valid, False otherwise
     """
@@ -167,35 +168,35 @@ def validate_csv_row(row: dict, required_fields: list) -> bool:
 def sanitize_string(value: str, max_length: int = 500) -> str:
     """
     Sanitize a string value.
-    
+
     Args:
         value: String to sanitize
         max_length: Maximum length
-        
+
     Returns:
         Sanitized string
     """
     if not isinstance(value, str):
         value = str(value)
-    
+
     # Remove null bytes and control characters
-    value = value.replace('\x00', '')
-    value = ''.join(char for char in value if ord(char) >= 32 or char in '\n\r\t')
-    
+    value = value.replace("\x00", "")
+    value = "".join(char for char in value if ord(char) >= 32 or char in "\n\r\t")
+
     # Truncate if too long
     if len(value) > max_length:
         value = value[:max_length]
-    
+
     return value.strip()
 
 
 def parse_risk_score(score: any) -> float:
     """
     Parse and normalize a risk score to 0-10 scale.
-    
+
     Args:
         score: Score value (can be string, int, float)
-        
+
     Returns:
         Normalized float score between 0 and 10
     """
@@ -210,16 +211,17 @@ def parse_risk_score(score: any) -> float:
 def format_timestamp(dt) -> str:
     """
     Format a datetime object to ISO 8601 string.
-    
+
     Args:
         dt: datetime object
-        
+
     Returns:
         ISO 8601 formatted string
     """
     if dt is None:
         return None
     return dt.isoformat()
+
 
 PRIMARY_INDICATOR_FIELDS = [
     "value",
@@ -260,6 +262,7 @@ _SUPPORTED_INDICATOR_FIELDS = {
     *PRIMARY_INDICATOR_FIELDS,
     *_ALIAS_TO_TYPE.keys(),
 }
+
 
 def _normalize_raw_value(value: any) -> Optional[str]:
     """Normalize a raw value extracted from ingestion sources."""
@@ -320,7 +323,6 @@ def extract_indicator_value_and_type(
                 return value, IndicatorType.HASH, original_key
 
     return None, None, None
-
 
 
 def supported_indicator_fields() -> Tuple[str, ...]:

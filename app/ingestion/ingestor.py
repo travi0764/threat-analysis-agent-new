@@ -4,9 +4,9 @@ All ingestors (CSV, JSON, API, etc.) must implement this interface.
 """
 
 from abc import ABC, abstractmethod
-from typing import List, Dict, Any, Optional
 from dataclasses import dataclass
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 
 from app.storage.models import IndicatorType, SourceType
 
@@ -16,6 +16,7 @@ class IndicatorData:
     """
     Data class representing a raw indicator before database insertion.
     """
+
     indicator_type: IndicatorType
     value: str
     source_type: SourceType
@@ -25,7 +26,7 @@ class IndicatorData:
     tags: Optional[List[str]] = None
     notes: Optional[str] = None
     first_seen: Optional[datetime] = None
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for database insertion."""
         return {
@@ -46,6 +47,7 @@ class IngestionResult:
     """
     Result of an ingestion operation.
     """
+
     success: bool
     indicators_processed: int
     indicators_created: int
@@ -53,14 +55,16 @@ class IngestionResult:
     indicators_failed: int
     errors: List[Dict[str, Any]]
     metadata: Optional[Dict[str, Any]] = None
-    
+
     def add_error(self, row_number: int, error: str, data: Any = None):
         """Add an error to the result."""
-        self.errors.append({
-            "row": row_number,
-            "error": error,
-            "data": data,
-        })
+        self.errors.append(
+            {
+                "row": row_number,
+                "error": error,
+                "data": data,
+            }
+        )
 
 
 class BaseIngestor(ABC):
@@ -68,64 +72,65 @@ class BaseIngestor(ABC):
     Abstract base class for all ingestors.
     Defines the interface that all ingestors must implement.
     """
-    
+
     def __init__(self, source_type: SourceType, source_name: str):
         """
         Initialize the ingestor.
-        
+
         Args:
             source_type: Type of data source
             source_name: Name of the data source
         """
         self.source_type = source_type
         self.source_name = source_name
-    
+
     @abstractmethod
     def ingest(self, *args, **kwargs) -> IngestionResult:
         """
         Ingest data from the source.
-        
+
         Returns:
             IngestionResult with statistics and any errors
         """
         pass
-    
+
     @abstractmethod
     def validate(self, data: Any) -> bool:
         """
         Validate the input data format.
-        
+
         Args:
             data: Data to validate
-            
+
         Returns:
             True if valid, False otherwise
         """
         pass
-    
-    def normalize_indicator(self, raw_indicator: Dict[str, Any]) -> Optional[IndicatorData]:
+
+    def normalize_indicator(
+        self, raw_indicator: Dict[str, Any]
+    ) -> Optional[IndicatorData]:
         """
         Normalize a raw indicator into IndicatorData format.
         Should be overridden by subclasses for source-specific normalization.
-        
+
         Args:
             raw_indicator: Raw indicator data
-            
+
         Returns:
             IndicatorData object or None if normalization fails
         """
         pass
-    
+
     def batch_normalize(
-        self, 
-        raw_indicators: List[Dict[str, Any]]
+        self, raw_indicators: List[Dict[str, Any]]
     ) -> List[IndicatorData]:
         """
         Normalize a batch of raw indicators.
-        
+
         Args:
             raw_indicators: List of raw indicator data
-            
+
         Returns:
             List of IndicatorData objects
         """
@@ -138,7 +143,7 @@ class BaseIngestor(ABC):
             except Exception:
                 # Log error but continue processing
                 continue
-        
+
         return normalized
 
 

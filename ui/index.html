@@ -55,27 +55,88 @@
         <!-- Upload Section -->
         <div class="upload-section">
             <h2>📤 Upload Threat Indicators</h2>
-            <div class="upload-area" id="uploadArea">
-                <input type="file" id="fileInput" accept=".csv" hidden>
-                <div class="upload-content">
-                    <div class="upload-icon">📁</div>
-                    <p class="upload-text">Drag & drop your CSV file here or click to browse</p>
-                    <p class="upload-hint">Supports CSV files with threat indicators (max 10MB)</p>
-                    <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">
-                        Choose File
-                    </button>
+            <div class="upload-tabs">
+                <button class="tab-btn active" onclick="switchTab('bulk')" id="bulkTab">Bulk Upload</button>
+                <button class="tab-btn" onclick="switchTab('single')" id="singleTab">Single Indicator</button>
+            </div>
+            
+            <!-- Bulk Upload Tab -->
+            <div id="bulkUploadSection" class="tab-content">
+                <div class="upload-area" id="uploadArea">
+                    <input type="file" id="fileInput" accept=".csv,.json" hidden>
+                    <div class="upload-content">
+                        <div class="upload-icon">📁</div>
+                        <p class="upload-text">Drag & drop your CSV or JSON file here or click to browse</p>
+                        <p class="upload-hint">Supports CSV and JSON files (max 10MB)</p>
+                        <button class="btn btn-primary" id="chooseFileButton">
+                            Choose File
+                        </button>
+                    </div>
+                </div>
+                <div class="upload-options">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="enrichCheckbox" checked>
+                        <span>Auto-enrich indicators</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="classifyCheckbox" checked>
+                        <span>Auto-classify with AI</span>
+                    </label>
                 </div>
             </div>
-            <div class="upload-options">
-                <label class="checkbox-label">
-                    <input type="checkbox" id="enrichCheckbox" checked>
-                    <span>Auto-enrich indicators</span>
-                </label>
-                <label class="checkbox-label">
-                    <input type="checkbox" id="classifyCheckbox" checked>
-                    <span>Auto-classify with AI</span>
-                </label>
+
+            <!-- Single Indicator Tab -->
+            <div id="singleUploadSection" class="tab-content" style="display: none;">
+                <div class="single-upload-form">
+                    <div class="form-group">
+                        <label for="indicatorValue">Indicator Value *</label>
+                        <input type="text" id="indicatorValue" class="input" placeholder="Enter indicator value" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="indicatorType">Indicator Type</label>
+                        <select id="indicatorType" class="input">
+                            <option value="auto">Auto-detect</option>
+                            <option value="domain">Domain</option>
+                            <option value="ip">IP Address</option>
+                            <option value="hash">Hash</option>
+                            <option value="url">URL</option>
+                            <option value="email">Email</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="sourceName">Source</label>
+                            <input type="text" id="sourceName" class="input" placeholder="Source name">
+                        </div>
+                        <div class="form-group">
+                            <label for="sourceUrl">Source URL</label>
+                            <input type="text" id="sourceUrl" class="input" placeholder="Source URL">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="tags">Tags (comma separated)</label>
+                        <input type="text" id="tags" class="input" placeholder="phishing, malware, etc.">
+                    </div>
+                    <div class="form-group">
+                        <label for="notes">Notes</label>
+                        <textarea id="notes" class="input" rows="2" placeholder="Additional notes"></textarea>
+                    </div>
+                    <div class="upload-options">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="singleEnrichCheckbox" checked>
+                            <span>Auto-enrich indicator</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="singleClassifyCheckbox" checked>
+                            <span>Auto-classify with AI</span>
+                        </label>
+                    </div>
+                    <div class="form-actions">
+                        <button class="btn btn-primary" onclick="submitSingleIndicator()">Submit Indicator</button>
+                    </div>
+                </div>
             </div>
+
             <div id="uploadProgress" class="upload-progress hidden">
                 <div class="progress-bar">
                     <div class="progress-fill" id="progressFill"></div>

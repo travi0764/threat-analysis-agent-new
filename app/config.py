@@ -6,6 +6,7 @@ Loads settings from config.yaml and environment variables.
 import os
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+
 import yaml
 from pydantic import BaseModel, Field
 from pydantic_settings import BaseSettings
@@ -13,6 +14,7 @@ from pydantic_settings import BaseSettings
 
 class AppConfig(BaseModel):
     """Application configuration."""
+
     name: str
     version: str
     debug: bool = False
@@ -22,6 +24,7 @@ class AppConfig(BaseModel):
 
 class DatabaseConfig(BaseModel):
     """Database configuration."""
+
     type: str = "sqlite"
     path: str = "threat_intelligence.db"
     echo: bool = False
@@ -29,6 +32,7 @@ class DatabaseConfig(BaseModel):
 
 class OpenAIConfig(BaseModel):
     """OpenAI configuration."""
+
     model: str = "gpt-4o-mini"
     temperature: float = 0.3
     max_tokens: int = 2000
@@ -36,6 +40,7 @@ class OpenAIConfig(BaseModel):
 
 class ClassificationConfig(BaseModel):
     """Classification thresholds configuration."""
+
     high_risk_threshold: float = 7.0
     medium_risk_threshold: float = 4.0
     concurrent_limit: int = 10
@@ -43,6 +48,7 @@ class ClassificationConfig(BaseModel):
 
 class EnrichmentConfig(BaseModel):
     """Enrichment configuration."""
+
     timeout: int = 30
     max_retries: int = 3
     retry_delay: int = 2
@@ -51,6 +57,7 @@ class EnrichmentConfig(BaseModel):
 
 class DataSourceConfig(BaseModel):
     """Data source configuration."""
+
     url: str
     enabled: bool = True
     api_key: Optional[str] = None
@@ -59,6 +66,7 @@ class DataSourceConfig(BaseModel):
 
 class SchedulerConfig(BaseModel):
     """Scheduler configuration for autonomous mode."""
+
     enabled: bool = False
     interval_minutes: int = 60
     max_indicators_per_run: int = 100
@@ -66,6 +74,7 @@ class SchedulerConfig(BaseModel):
 
 class LoggingConfig(BaseModel):
     """Logging configuration."""
+
     level: str = "INFO"
     format: str = "json"
     file: str = "logs/threat_agent.log"
@@ -75,18 +84,19 @@ class LoggingConfig(BaseModel):
 
 class CORSConfig(BaseModel):
     """CORS configuration."""
+
     enabled: bool = True
     origins: List[str] = Field(default_factory=list)
 
 
 class Settings(BaseSettings):
     """Main settings class that loads all configurations."""
-    
+
     # API Keys from environment
     openai_api_key: str = Field(default="", env="OPENAI_API_KEY")
     abuseipdb_api_key: str = Field(default="", env="ABUSEIPDB_API_KEY")
     malshare_api_key: str = Field(default="", env="MALSHARE_API_KEY")
-    
+
     # Configuration sections
     app: AppConfig
     database: DatabaseConfig
@@ -97,7 +107,7 @@ class Settings(BaseSettings):
     scheduler: SchedulerConfig
     logging: LoggingConfig
     cors: CORSConfig
-    
+
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"
@@ -107,34 +117,34 @@ class Settings(BaseSettings):
 def load_config(config_path: str = "config.yaml") -> Settings:
     """
     Load configuration from YAML file and environment variables.
-    
+
     Args:
         config_path: Path to the YAML configuration file
-        
+
     Returns:
         Settings object with all configurations
     """
     # Get the project root directory
     project_root = Path(__file__).parent.parent
     config_file = project_root / config_path
-    
+
     if not config_file.exists():
         raise FileNotFoundError(f"Configuration file not found: {config_file}")
-    
+
     # Load YAML configuration
     with open(config_file, "r") as f:
         config_data = yaml.safe_load(f)
-    
+
     # Replace environment variable placeholders
     config_data = _replace_env_vars(config_data)
-    
+
     # Create Settings object
     settings = Settings(**config_data)
-    
+
     # Create logs directory if it doesn't exist
     log_dir = project_root / "logs"
     log_dir.mkdir(exist_ok=True)
-    
+
     return settings
 
 

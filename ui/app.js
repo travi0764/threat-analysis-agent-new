@@ -21,6 +21,9 @@ document.addEventListener('DOMContentLoaded', function() {
     setInterval(() => {
         loadStats();
     }, 30000);
+
+    // Initialize file input accept types
+    document.getElementById('fileInput').accept = '.csv,.json';
 });
 
 // === Upload Functionality ===
@@ -28,6 +31,7 @@ document.addEventListener('DOMContentLoaded', function() {
 function initializeUpload() {
     const uploadArea = document.getElementById('uploadArea');
     const fileInput = document.getElementById('fileInput');
+    const chooseFileButton = document.getElementById('chooseFileButton');
     
     // Drag and drop
     uploadArea.addEventListener('dragover', (e) => {
@@ -45,17 +49,26 @@ function initializeUpload() {
         
         const files = e.dataTransfer.files;
         if (files.length > 0) {
-            fileInput.files = files;
-            handleFileUpload(files[0]);
+            const file = files[0];
+            handleFileUpload(file);
         }
     });
     
     // File input change
     fileInput.addEventListener('change', (e) => {
         if (e.target.files.length > 0) {
-            handleFileUpload(e.target.files[0]);
+            const file = e.target.files[0];
+            handleFileUpload(file);
         }
     });
+    
+    // Choose file button (prevent double-trigger from bubbling)
+    if (chooseFileButton) {
+        chooseFileButton.addEventListener('click', (event) => {
+            event.stopPropagation();
+            fileInput.click();
+        });
+    }
     
     // Click to upload
     uploadArea.addEventListener('click', () => {
@@ -63,9 +76,31 @@ function initializeUpload() {
     });
 }
 
+// Tab switching functionality
+function switchTab(tab) {
+    const bulkTab = document.getElementById('bulkTab');
+    const singleTab = document.getElementById('singleTab');
+    const bulkSection = document.getElementById('bulkUploadSection');
+    const singleSection = document.getElementById('singleUploadSection');
+    
+    if (tab === 'bulk') {
+        bulkTab.classList.add('active');
+        singleTab.classList.remove('active');
+        bulkSection.style.display = 'block';
+        singleSection.style.display = 'none';
+    } else {
+        bulkTab.classList.remove('active');
+        singleTab.classList.add('active');
+        bulkSection.style.display = 'none';
+        singleSection.style.display = 'block';
+    }
+}
+
 async function handleFileUpload(file) {
-    if (!file.name.endsWith('.csv')) {
-        showUploadResult('Please select a CSV file', 'error');
+    const fileName = file.name.toLowerCase();
+
+    if (!fileName.endsWith('.csv') && !fileName.endsWith('.json')) {
+        showUploadResult('Please select a CSV or JSON file', 'error');
         return;
     }
     
@@ -88,7 +123,9 @@ async function handleFileUpload(file) {
         progressFill.style.width = '30%';
         progressText.textContent = 'Uploading file...';
         
-        const response = await fetch(`${API_BASE}/api/ingest/upload-csv?enrich=${enrich}&classify=${classify}`, {
+        // Choose endpoint based on file type
+        const endpoint = fileName.endsWith('.csv') ? 'upload-csv' : 'upload-json';
+        const response = await fetch(`${API_BASE}/api/ingest/${endpoint}?enrich=${enrich}&classify=${classify}`, {
             method: 'POST',
             body: formData
         });
@@ -115,6 +152,83 @@ async function handleFileUpload(file) {
         }
     } catch (error) {
         console.error('Upload error:', error);
+        showUploadResult(`❌ Error: ${error.message}`, 'error');
+    } finally {
+        setTimeout(() => {
+            progressDiv.classList.add('hidden');
+        }, 2000);
+        // Clear file input so selecting the same file again triggers change
+        try { document.getElementById('fileInput').value = ''; } catch (e) { /* ignore */ }
+    }
+}
+
+// Submit single indicator
+async function submitSingleIndicator() {
+    const value = document.getElementById('indicatorValue').value.trim();
+    if (!value) {
+        showUploadResult('Please enter an indicator value', 'error');
+        return;
+    }
+    
+    const indicator = {
+        value: value,
+        indicator_type: document.getElementById('indicatorType').value,
+        source: document.getElementById('sourceName').value.trim() || 'manual',
+        source_url: document.getElementById('sourceUrl').value.trim(),
+        tags: document.getElementById('tags').value.trim().split(',').map(t => t.trim()).filter(t => t),
+        notes: document.getElementById('notes').value.trim()
+    };
+    
+    const enrich = document.getElementById('singleEnrichCheckbox').checked;
+    const classify = document.getElementById('singleClassifyCheckbox').checked;
+    
+    const progressDiv = document.getElementById('uploadProgress');
+    const resultDiv = document.getElementById('uploadResult');
+    const progressFill = document.getElementById('progressFill');
+    const progressText = document.getElementById('progressText');
+    
+    progressDiv.classList.remove('hidden');
+    resultDiv.classList.add('hidden');
+    progressFill.style.width = '0%';
+    
+    try {
+        progressFill.style.width = '30%';
+        progressText.textContent = 'Submitting indicator...';
+        
+        const response = await fetch(`${API_BASE}/api/ingest/submit?enrich=${enrich}&classify=${classify}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(indicator)
+        });
+        
+        const data = await response.json();
+        
+        progressFill.style.width = '100%';
+        progressText.textContent = 'Complete!';
+        
+        if (response.ok) {
+            showUploadResult('✅ Indicator submitted successfully', 'success');
+            
+            // Clear form
+            document.getElementById('indicatorValue').value = '';
+            document.getElementById('indicatorType').value = 'auto';
+            document.getElementById('sourceName').value = '';
+            document.getElementById('sourceUrl').value = '';
+            document.getElementById('tags').value = '';
+            document.getElementById('notes').value = '';
+            
+            // Refresh data
+            setTimeout(() => {
+                loadStats();
+                loadIndicators();
+            }, 2000);
+        } else {
+            showUploadResult(`❌ Error: ${data.detail || 'Submission failed'}`, 'error');
+        }
+    } catch (error) {
+        console.error('Submit error:', error);
         showUploadResult(`❌ Error: ${error.message}`, 'error');
     } finally {
         setTimeout(() => {
@@ -211,7 +325,15 @@ function displayIndicators(indicators) {
                 <td style="max-width: 300px; overflow: hidden; text-overflow: ellipsis;">${escapeHtml(indicator.value)}</td>
                 <td>${riskBadge}</td>
                 <td>${score}</td>
-                <td>${enrichmentCount}</td>
+                <td>
+                    ${enrichmentCount}
+                    ${indicator.enrichments && indicator.enrichments.length > 0 
+                        ? `<span class="enrichment-status ${indicator.enrichments.some(e => !e.success) ? 'enrichment-failed' : ''}" 
+                            title="${indicator.enrichments.map(e => `${e.provider}: ${e.success ? 'Success' : 'Failed - ' + e.error_message}`).join('\n')}">
+                            ${indicator.enrichments.some(e => !e.success) ? '⚠️' : '✓'}
+                           </span>`
+                        : ''}
+                </td>
                 <td>${escapeHtml(indicator.source_name || '-')}</td>
                 <td>${createdDate}</td>
                 <td>

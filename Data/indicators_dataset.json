@@ -1,0 +1,415 @@
+[
+  {
+    "value": "ad9dfd6bac0d9d20123bced230923549439b5d77fa2610e94dbbaeb411cdf644",
+    "indicator_type": "hash",
+    "source": "manual",
+    "tags": "trojan",
+    "notes": "SHA256 hash of suspected trojan"
+  },
+  {
+    "value": "906a5aca2ec0439dfe9c1c124578ab456825b773f25595330de96d78c13a4c69",
+    "indicator_type": "hash",
+    "source": "manual",
+    "tags": "malware",
+    "notes": "SHA256 hash of potential malware"
+  },
+  {
+    "value": "d921ee044d098e85b056e92b67698a8aa4df20a074ae73c67e9fcd1f549af1f6",
+    "indicator_type": "hash",
+    "source": "manual",
+    "tags": "ransomware",
+    "notes": "SHA256 hash of ransomware sample"
+  },
+  {
+    "value": "fe04cced8b578b08743f8ed02c3eecd78e414d2370d6554b070e5796d9b95dfc",
+    "indicator_type": "hash",
+    "source": "manual",
+    "tags": "malware",
+    "notes": "SHA256 hash of malicious executable"
+  },
+  {
+    "value": "986d70b730d1e4ca4cab01e47b879449c789c5c3f71b5f8f5c46ab4a4a91c1ca",
+    "indicator_type": "hash",
+    "source": "manual",
+    "tags": "trojan",
+    "notes": "SHA256 hash of trojan"
+  },
+  {
+    "value": "7f2b10f392ac2e5bf582ef32c5eef0266be97a3513a5539668dfe9ea9681b89a",
+    "indicator_type": "hash",
+    "source": "manual",
+    "tags": "malware",
+    "notes": "SHA256 hash of suspected malware"
+  },
+  {
+    "value": "24c37344c4e940626e8116e09a3edf4e635f4b487cc7bbd765152c2e12bca4f4",
+    "indicator_type": "hash",
+    "source": "manual",
+    "tags": "ransomware",
+    "notes": "SHA256 hash of ransomware"
+  },
+  {
+    "value": "cfdcfa233f9f4ede8ebd43e8b71883c8",
+    "indicator_type": "hash",
+    "source": "manual",
+    "tags": "malware",
+    "notes": "MD5 hash of malicious file"
+  },
+  {
+    "value": "7a238e85ddc109ea71511e65d1236651",
+    "indicator_type": "hash",
+    "source": "manual",
+    "tags": "trojan",
+    "notes": "MD5 hash of trojan executable"
+  },
+  {
+    "value": "8ceca9687da69d642d64b09656c65fb6",
+    "indicator_type": "hash",
+    "source": "manual",
+    "tags": "malware",
+    "notes": "MD5 hash of malicious file"
+  },
+  {
+    "value": "cd210c09ee63658e43df3ce6df9f6b02",
+    "indicator_type": "hash",
+    "source": "manual",
+    "tags": "ransomware",
+    "notes": "MD5 hash of ransomware sample"
+  },
+  {
+    "value": "e19a0b88c554a76102d9b949a2b9ff66",
+    "indicator_type": "hash",
+    "source": "manual",
+    "tags": "malware",
+    "notes": "MD5 hash of malicious file"
+  },
+  {
+    "value": "d59a00871c1deaf89e4b4ff1052514ab",
+    "indicator_type": "hash",
+    "source": "manual",
+    "tags": "trojan",
+    "notes": "MD5 hash of trojan"
+  },
+  {
+    "value": "58e45c793b0b3267a26f92590dd44987b2c094d5",
+    "indicator_type": "hash",
+    "source": "manual",
+    "tags": "ransomware",
+    "notes": "SHA1 hash of ransomware sample"
+  },
+  {
+    "value": "a0067883c59d103b85abfc3a6a6271566b37b2e6",
+    "indicator_type": "hash",
+    "source": "manual",
+    "tags": "malware",
+    "notes": "SHA1 hash of malicious file"
+  },
+  {
+    "value": "69b02c7bf2d5facbf9c08d83dd4e006a235443ba",
+    "indicator_type": "hash",
+    "source": "manual",
+    "tags": "trojan",
+    "notes": "SHA1 hash of trojan"
+  },
+  {
+    "value": "1b00d3921003df71193b5aa71f0f2b8f01aa207a",
+    "indicator_type": "hash",
+    "source": "manual",
+    "tags": "malware",
+    "notes": "SHA1 hash of malicious file"
+  },
+  {
+    "value": "49432a714e116a80de2ad33408fb54579eef6549",
+    "indicator_type": "hash",
+    "source": "manual",
+    "tags": "ransomware",
+    "notes": "SHA1 hash of ransomware"
+  },
+  {
+    "value": "1.14.12.141",
+    "indicator_type": "ip",
+    "source": "manual",
+    "tags": "scanning,bruteforce",
+    "notes": "Suspected SSH brute force attempts"
+  },
+  {
+    "value": "1.180.230.98",
+    "indicator_type": "ip",
+    "source": "manual",
+    "tags": "botnet",
+    "notes": "Part of botnet infrastructure"
+  },
+  {
+    "value": "1.180.62.41",
+    "indicator_type": "ip",
+    "source": "manual",
+    "tags": "malware,scanning",
+    "notes": "Known malware distribution source"
+  },
+  {
+    "value": "1.180.97.138",
+    "indicator_type": "ip",
+    "source": "manual",
+    "tags": "phishing",
+    "notes": "Hosting phishing pages"
+  },
+  {
+    "value": "1.183.3.58",
+    "indicator_type": "ip",
+    "source": "manual",
+    "tags": "botnet",
+    "notes": "Part of botnet command and control"
+  },
+  {
+    "value": "1.193.163.2",
+    "indicator_type": "ip",
+    "source": "manual",
+    "tags": "scanning,bruteforce",
+    "notes": "Port scanning activity detected"
+  },
+  {
+    "value": "1.204.71.81",
+    "indicator_type": "ip",
+    "source": "manual",
+    "tags": "malware",
+    "notes": "Known malware distribution IP"
+  },
+  {
+    "value": "1.212.225.99",
+    "indicator_type": "ip",
+    "source": "manual",
+    "tags": "phishing",
+    "notes": "Hosting fake login pages"
+  },
+  {
+    "value": "1.235.192.130",
+    "indicator_type": "ip",
+    "source": "manual",
+    "tags": "botnet",
+    "notes": "Botnet communication IP"
+  },
+  {
+    "value": "1.235.192.131",
+    "indicator_type": "ip",
+    "source": "manual",
+    "tags": "scanning,malware",
+    "notes": "Malware distribution and scanning"
+  },
+  {
+    "value": "1.237.155.150",
+    "indicator_type": "ip",
+    "source": "manual",
+    "tags": "phishing",
+    "notes": "Suspected phishing server"
+  },
+  {
+    "value": "1.24.210.27",
+    "indicator_type": "ip",
+    "source": "manual",
+    "tags": "botnet",
+    "notes": "Part of botnet network"
+  },
+  {
+    "value": "1.241.64.92",
+    "indicator_type": "ip",
+    "source": "manual",
+    "tags": "scanning,bruteforce",
+    "notes": "Brute force attack source"
+  },
+  {
+    "value": "1.244.246.221",
+    "indicator_type": "ip",
+    "source": "manual",
+    "tags": "malware",
+    "notes": "Malware hosting IP"
+  },
+  {
+    "value": "1.247.245.61",
+    "indicator_type": "ip",
+    "source": "manual",
+    "tags": "phishing",
+    "notes": "Phishing site host"
+  },
+  {
+    "value": "1.252.204.204",
+    "indicator_type": "ip",
+    "source": "manual",
+    "tags": "botnet",
+    "notes": "Botnet C2 server"
+  },
+  {
+    "value": "1.30.20.238",
+    "indicator_type": "ip",
+    "source": "manual",
+    "tags": "malware,scanning",
+    "notes": "Malware distribution source"
+  },
+  {
+    "value": "1.30.20.98",
+    "indicator_type": "ip",
+    "source": "manual",
+    "tags": "phishing",
+    "notes": "Hosting phishing pages"
+  },
+  {
+    "value": "1.31.80.222",
+    "indicator_type": "ip",
+    "source": "manual",
+    "tags": "botnet",
+    "notes": "Botnet infrastructure IP"
+  },
+  {
+    "value": "1.52.123.218",
+    "indicator_type": "ip",
+    "source": "manual",
+    "tags": "scanning,bruteforce",
+    "notes": "SSH brute force attempts"
+  },
+  {
+    "value": "1.7.229.162",
+    "indicator_type": "ip",
+    "source": "manual",
+    "tags": "malware",
+    "notes": "Malware distribution IP"
+  },
+  {
+    "value": "https://pay.vivapagamento.com/686d433693bcb2cfe7ecabcf",
+    "indicator_type": "url",
+    "source": "manual",
+    "tags": "phishing",
+    "notes": "Suspected fake payment portal"
+  },
+  {
+    "value": "https://swedishmission.com/cid-82042-eid-243360",
+    "indicator_type": "url",
+    "source": "manual",
+    "tags": "phishing,scam",
+    "notes": "Potential scam website"
+  },
+  {
+    "value": "https://start-io-trezor-login.typedream.app/",
+    "indicator_type": "url",
+    "source": "manual",
+    "tags": "phishing",
+    "notes": "Fake cryptocurrency wallet login"
+  },
+  {
+    "value": "http://start-io-trezor-login.typedream.app",
+    "indicator_type": "url",
+    "source": "manual",
+    "tags": "phishing",
+    "notes": "Fake cryptocurrency wallet login"
+  },
+  {
+    "value": "http://trezor-io-start-learn-access-us.typedream.app",
+    "indicator_type": "url",
+    "source": "manual",
+    "tags": "phishing",
+    "notes": "Fake Trezor login page"
+  },
+  {
+    "value": "https://trezor-io-start-learn-access-us.typedream.app/",
+    "indicator_type": "url",
+    "source": "manual",
+    "tags": "phishing",
+    "notes": "Fake Trezor login page"
+  },
+  {
+    "value": "https://novobanco.sms-pt.info/?n=915151515",
+    "indicator_type": "url",
+    "source": "manual",
+    "tags": "phishing,smishing",
+    "notes": "Fake banking SMS scam"
+  },
+  {
+    "value": "https://belkkkkkkppp.webflow.io/",
+    "indicator_type": "url",
+    "source": "manual",
+    "tags": "phishing",
+    "notes": "Suspected phishing site"
+  },
+  {
+    "value": "https://web-io-trezor-sso.typedream.app/",
+    "indicator_type": "url",
+    "source": "manual",
+    "tags": "phishing",
+    "notes": "Fake Trezor SSO page"
+  },
+  {
+    "value": "http://web-io-trezor-sso.typedream.app",
+    "indicator_type": "url",
+    "source": "manual",
+    "tags": "phishing",
+    "notes": "Fake Trezor SSO page"
+  },
+  {
+    "value": "https://contrat-ulys.com/",
+    "indicator_type": "url",
+    "source": "manual",
+    "tags": "phishing,scam",
+    "notes": "Potential scam contract site"
+  },
+  {
+    "value": "https://contrat-ulys.com/as.php",
+    "indicator_type": "url",
+    "source": "manual",
+    "tags": "phishing,scam",
+    "notes": "Potential scam contract page"
+  },
+  {
+    "value": "https://secu-link-mrelay.info/",
+    "indicator_type": "url",
+    "source": "manual",
+    "tags": "phishing",
+    "notes": "Suspected phishing relay"
+  },
+  {
+    "value": "https://secu-link-mrelay.info/as.php",
+    "indicator_type": "url",
+    "source": "manual",
+    "tags": "phishing",
+    "notes": "Suspected phishing relay page"
+  },
+  {
+    "value": "https://evardis.de/info/",
+    "indicator_type": "url",
+    "source": "manual",
+    "tags": "phishing,scam",
+    "notes": "Potential scam website"
+  },
+  {
+    "value": "https://teamnaoki.com/cid-82042-eid-153582",
+    "indicator_type": "url",
+    "source": "manual",
+    "tags": "phishing,scam",
+    "notes": "Suspected scam site"
+  },
+  {
+    "value": "https://us16.campaign-archive.com/?u=e2193dd9bbab938499efabe6c&id=237aa3197e",
+    "indicator_type": "url",
+    "source": "manual",
+    "tags": "phishing,spam",
+    "notes": "Malicious email campaign link"
+  },
+  {
+    "value": "https://us2.campaign-archive.com/?u=91237f99a53e3c5d6c6a386c9&id=825f7b6fce",
+    "indicator_type": "url",
+    "source": "manual",
+    "tags": "phishing,spam",
+    "notes": "Malicious email campaign link"
+  },
+  {
+    "value": "https://green-forest-gb567.32cx354xvggiuhk.workers.dev/vrughdyhyjabujecuruppkrck10?ck=1&pxg=gen&e=&ep=&en=&eu=",
+    "indicator_type": "url",
+    "source": "manual",
+    "tags": "malware,phishing",
+    "notes": "Suspected malware distribution link"
+  },
+  {
+    "value": "https://arkansas.mobile-ofvp.cc/us",
+    "indicator_type": "url",
+    "source": "manual",
+    "tags": "phishing",
+    "notes": "Fake mobile service page"
+  }
+]

@@ -542,6 +542,82 @@ body {
     color: #999;
 }
 
+/* Tabs */
+.upload-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.tab-btn {
+    padding: 8px 16px;
+    border: 1px solid #e2e8f0;
+    background: #f8fafc;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.95em;
+    transition: all 0.2s;
+}
+
+.tab-btn.active {
+    background: #0f172a;
+    color: white;
+    border-color: #0f172a;
+}
+
+.tab-content {
+    opacity: 1;
+    transition: opacity 0.3s;
+}
+
+/* Single Upload Form */
+.single-upload-form {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    background: #f8fafc;
+    border-radius: 8px;
+}
+
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 0.95em;
+    color: #1e293b;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.form-actions {
+    margin-top: 24px;
+    text-align: right;
+}
+
+textarea.input {
+    resize: vertical;
+    min-height: 80px;
+}
+
+/* Enrichment Status */
+.enrichment-status {
+    display: inline-block;
+    margin-left: 5px;
+    font-size: 0.9em;
+    cursor: help;
+}
+
+.enrichment-status.enrichment-failed {
+    color: #ef4444;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .header {
@@ -560,5 +636,13 @@ body {
     .upload-options {
         flex-direction: column;
         gap: 10px;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .upload-tabs {
+        flex-direction: column;
     }
 }
